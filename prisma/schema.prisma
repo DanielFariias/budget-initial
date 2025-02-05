@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Produto {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  precoBase   Float
+  descricao   String
+  variantes   Variante[]
+  orcamentos  OrcamentoProduto[]
+}
+
+model Variante {
+  id          Int     @id @default(autoincrement())
+  quantidade  Int
+  preco       Float
+  produtoId   Int
+  produto     Produto @relation(fields: [produtoId], references: [id])
+}
+
+model Complemento {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  preco       Float
+  orcamentos  OrcamentoComplemento[]
+}
+
+model Orcamento {
+  id          Int       @id @default(autoincrement())
+  data        DateTime  @default(now())
+  produtos    OrcamentoProduto[]
+  complementos OrcamentoComplemento[]
+}
+
+model OrcamentoProduto {
+  id          Int       @id @default(autoincrement())
+  orcamentoId Int
+  produtoId   Int
+  quantidade  Int
+  orcamento   Orcamento @relation(fields: [orcamentoId], references: [id])
+  produto     Produto   @relation(fields: [produtoId], references: [id])
+}
+
+model OrcamentoComplemento {
+  id            Int       @id @default(autoincrement())
+  orcamentoId   Int
+  complementoId Int
+  quantidade    Int
+  orcamento     Orcamento @relation(fields: [orcamentoId], references: [id])
+  complemento   Complemento @relation(fields: [complementoId], references: [id])
+}
+
