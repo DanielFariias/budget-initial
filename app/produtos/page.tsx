@@ -1,20 +1,42 @@
-import { PrismaClient } from "@prisma/client"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { PrismaClient } from "@prisma/client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useEffect, useState } from "react";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function getProdutos() {
   return await prisma.produto.findMany({
     include: {
       variantes: true,
     },
-  })
+  });
 }
 
-export default async function ProdutosPage() {
-  const produtos = await getProdutos()
+export default function ProdutosPage() {
+  const [produtos, setProdutos] = useState([]);
+
+  useEffect(() => {
+    const fetchProdutos = async () => {
+      const response = await fetch("/api/produtos");
+      const data = await response.json();
+      setProdutos(data);
+    };
+
+    fetchProdutos();
+  }, []);
+
+  if (produtos.length === 0) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <div>
@@ -58,6 +80,5 @@ export default async function ProdutosPage() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
-
