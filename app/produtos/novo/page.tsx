@@ -1,12 +1,20 @@
-"use client"
-import { useRouter } from "next/navigation"
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+"use client";
+import { useRouter } from "next/navigation";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { revalidatePath } from "next/cache";
 
 const produtoSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -16,14 +24,14 @@ const produtoSchema = z.object({
     z.object({
       quantidade: z.number().min(1, "Quantidade deve ser maior que zero"),
       preco: z.number().min(0, "Preço deve ser maior ou igual a zero"),
-    }),
+    })
   ),
-})
+});
 
-type ProdutoFormValues = z.infer<typeof produtoSchema>
+type ProdutoFormValues = z.infer<typeof produtoSchema>;
 
 export default function NovoProdutoPage() {
-  const router = useRouter()
+  const router = useRouter();
   const form = useForm<ProdutoFormValues>({
     resolver: zodResolver(produtoSchema),
     defaultValues: {
@@ -32,12 +40,12 @@ export default function NovoProdutoPage() {
       descricao: "",
       variantes: [{ quantidade: 1, preco: 0 }],
     },
-  })
+  });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "variantes",
-  })
+  });
 
   const onSubmit = async (data: ProdutoFormValues) => {
     const response = await fetch("/api/produtos", {
@@ -46,12 +54,12 @@ export default function NovoProdutoPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    })
+    });
 
     if (response.ok) {
-      router.push("/produtos")
+      router.replace(`/produtos?t=${new Date().getTime()}`);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -76,7 +84,13 @@ export default function NovoProdutoPage() {
             <FormItem>
               <FormLabel>Preço Base</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={(e) => field.onChange(Number.parseFloat(e.target.value))} />
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) =>
+                    field.onChange(Number.parseFloat(e.target.value))
+                  }
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -108,7 +122,9 @@ export default function NovoProdutoPage() {
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) => field.onChange(Number.parseInt(e.target.value))}
+                        onChange={(e) =>
+                          field.onChange(Number.parseInt(e.target.value))
+                        }
                         placeholder="Quantidade"
                       />
                     </FormControl>
@@ -125,7 +141,9 @@ export default function NovoProdutoPage() {
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
                         placeholder="Preço"
                       />
                     </FormControl>
@@ -133,18 +151,24 @@ export default function NovoProdutoPage() {
                   </FormItem>
                 )}
               />
-              <Button type="button" variant="destructive" onClick={() => remove(index)}>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => remove(index)}
+              >
                 Remover
               </Button>
             </div>
           ))}
-          <Button type="button" onClick={() => append({ quantidade: 1, preco: 0 })}>
+          <Button
+            type="button"
+            onClick={() => append({ quantidade: 1, preco: 0 })}
+          >
             Adicionar Variante
           </Button>
         </div>
         <Button type="submit">Salvar Produto</Button>
       </form>
     </Form>
-  )
+  );
 }
-

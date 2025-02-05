@@ -74,7 +74,7 @@ export default function NovoOrcamentoPage() {
     });
 
     if (response.ok) {
-      router.push("/orcamentos");
+      router.replace(`/orcamentos?t=${new Date().getTime()}`);
     }
   };
 
